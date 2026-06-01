@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Region B - Map and Commercial Analysis</title>
+
+  <!-- Leaflet Map -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- ECharts -->
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+
+  <style>
+    :root {
+      --primary: #1e3a5f;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --good: #27ae60;
+      --medium: #f39c12;
+      --bad: #e74c3c;
+      --gray: #95a5a6;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      min-height: 100%;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans HK",
+        "Noto Sans TC", "Microsoft JhengHei", Arial, sans-serif;
+      background: transparent;
+      color: #111827;
+    }
+
+    body {
+      padding: 16px;
+    }
+
+    .region-b-container {
+      width: 100%;
+      background: var(--card);
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+      padding: 16px;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      margin-bottom: 14px;
+    }
+
+    .section-header h2 {
+      margin: 0;
+      font-size: 20px;
+      color: var(--primary);
+      letter-spacing: 0.01em;
+    }
+
+    .section-header p {
+      margin: 4px 0 0;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .status-pill {
+      flex: 0 0 auto;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #eef3f8;
+      color: var(--primary);
+      font-size: 12px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .kpi-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .kpi-card {
+      background: #fafbfc;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      min-height: 78px;
+    }
+
+    .kpi-card .value {
+      display: block;
+      font-size: 24px;
+      line-height: 1.15;
+      font-weight: 750;
+      color: var(--primary);
+    }
+
+    .kpi-card .label {
+      display: block;
+      margin-top: 6px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .b-grid {
+      display: grid;
+      grid-template-columns: minmax(420px, 1.55fr) minmax(280px, 1fr);
+      gap: 16px;
+    }
+
+    .panel {
+      background: #fafbfc;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      min-width: 0;
+    }
+
+    .panel-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .panel-title h3 {
+      margin: 0;
+      font-size: 15px;
+      color: var(--primary);
+    }
+
+    .panel-title span {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    #map {
+      width: 100%;
+      height: 430px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: #e9eef5;
+    }
+
+    .charts-column {
+      display: grid;
+      grid-template-rows: 230px 230px;
+      gap: 16px;
+    }
+
+    #chainChart,
+    #ratingChart,
+    #brandChart,
+    #opportunityChart {
+      width: 100%;
+      height: 100%;
+    }
+
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: minmax(360px, 1fr) minmax(360px, 1fr);
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .bottom-panel {
+      height: 290px;
+    }
+
+    .legend-note {
+      margin-top: 10px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .dot {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+    }
+
+    .empty-state {
+      padding: 28px 16px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    .leaflet-popup-content {
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .popup-name {
+      font-weight: 700;
+      color: var(--primary);
+      font-size: 13px;
+    }
+
+    .popup-tag {
+      display: inline-block;
+      margin-top: 4px;
+      padding: 2px 6px;
+      border-radius: 999px;
+      background: #eef3f8;
+      color: var(--primary);
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    @media (max-width: 980px) {
+      .b-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .bottom-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .charts-column {
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: 230px;
+      }
+    }
+
+    @media (max-width: 720px) {
+      body {
+        padding: 10px;
+      }
+
+      .kpi-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .charts-column {
+        grid-template-columns: 1fr;
+        grid-template-rows: 220px 220px;
+      }
+
+      #map {
+        height: 360px;
+      }
+
+      .section-header {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="region-b-container">
+    <div class="section-header">
+      <div>
+        <h2>Region B · Spatial & Commercial Analysis</h2>
+        <p>
+          Merchant distribution, chain structure, rating quality and brand ranking.
+          Designed to identify high-potential pharmacy merchants for Octopus expansion.
+        </p>
+      </div>
+      <div class="status-pill" id="dataStatus">Loading data...</div>
+    </div>
+
+    <div class="kpi-strip">
+      <div class="kpi-card">
+        <span class="value" id="kpiVisibleStores">0</span>
+        <span class="label">Visible merchants</span>
+      </div>
+      <div class="kpi-card">
+        <span class="value" id="kpiGeoStores">0</span>
+        <span class="label">With map coordinates</span>
+      </div>
+      <div class="kpi-card">
+        <span class="value" id="kpiAvgReview">0</span>
+        <span class="label">Avg. Google reviews</span>
+      </div>
+      <div class="kpi-card">
+        <span class="value" id="kpiHighPotential">0</span>
+        <span class="label">High-potential non-Octopus</span>
+      </div>
+    </div>
+
+    <div class="b-grid">
+      <div class="panel">
+        <div class="panel-title">
+          <h3>Merchant Distribution Map</h3>
+          <span>Marker size = review count · color = rating</span>
+        </div>
+        <div id="map"></div>
+        <div class="legend-note">
+          <span class="legend-item"><i class="dot" style="background:#27ae60"></i> Rating ≥ 4.0</span>
+          <span class="legend-item"><i class="dot" style="background:#f39c12"></i> Rating 3.0–3.9</span>
+          <span class="legend-item"><i class="dot" style="background:#e74c3c"></i> Rating &lt; 3.0</span>
+          <span class="legend-item"><i class="dot" style="background:#95a5a6"></i> No rating</span>
+        </div>
+      </div>
+
+      <div class="charts-column">
+        <div class="panel">
+          <div class="panel-title">
+            <h3>Chain vs Independent</h3>
+            <span>By merchant count</span>
+          </div>
+          <div id="chainChart"></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">
+            <h3>Google Rating Distribution</h3>
+            <span>Quality segmentation</span>
+          </div>
+          <div id="ratingChart"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottom-grid">
+      <div class="panel bottom-panel">
+        <div class="panel-title">
+          <h3>Brand Ranking</h3>
+          <span>Top chain brands detected</span>
+        </div>
+        <div id="brandChart"></div>
+      </div>
+
+      <div class="panel bottom-panel">
+        <div class="panel-title">
+          <h3>High-Potential Non-Octopus Stores</h3>
+          <span>Top districts by review volume</span>
+        </div>
+        <div id="opportunityChart"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /***********************
+     * 1. Global variables
+     ***********************/
+    var originalData = [];
+    var currentData = [];
+    var latestFilters = {};
+    var map = null;
+    var markerLayer = null;
+
+    var chainBrands = [
+      "Mannings",
+      "Watsons",
+      "7-Eleven",
+      "Circle K",
+      "AEON",
+      "ParknShop",
+      "PARKnSHOP",
+      "Wellcome",
+      "CR Care",
+      "Health Plus",
+      "Fanda",
+      "屈臣氏",
+      "萬寧",
+      "華潤堂"
+    ];
+
+    /***********************
+     * 2. Utility functions
+     ***********************/
+    function toNumber(value) {
+      if (value === null || value === undefined || value === "") return 0;
+      var n = Number(value);
+      return isNaN(n) ? 0 : n;
+    }
+
+    function getText(item, keys) {
+      for (var i = 0; i < keys.length; i++) {
+        var value = item[keys[i]];
+        if (value !== null && value !== undefined && String(value).trim() !== "") {
+          return String(value).trim();
+        }
+      }
+      return "";
+    }
+
+    function getLat(item) {
+      return toNumber(item.google_lat || item.lat || item.latitude);
+    }
+
+    function getLng(item) {
+      return toNumber(item.google_lng || item.lng || item.longitude || item.google_lon);
+    }
+
+    function getRating(item) {
+      return toNumber(item.google_rating || item.rating);
+    }
+
+    function getReviewCount(item) {
+      return toNumber(item.google_review_count || item.review_count || item.user_ratings_total);
+    }
+
+    function getDistrict(item) {
+      return getText(item, ["district_18", "district", "District"]) || "Unknown";
+    }
+
+    function getOctopusStatus(item) {
+      return getText(item, ["octopus_payment_yn", "octopus", "Octopus"]);
+    }
+
+    function getMerchantName(item) {
+      return getText(item, ["name", "merchant_name", "google_name", "shop_name"]) || "Unnamed Merchant";
+    }
+
+    function getAddress(item) {
+      return getText(item, ["address", "google_address", "formatted_address"]) || "-";
+    }
+
+    function isOctopusYes(item) {
+      var v = getOctopusStatus(item).toLowerCase();
+      return v === "y" || v === "yes" || v === "true" || v === "1";
+    }
+
+    function isChain(item) {
+      var chainType = getText(item, ["chain_type", "store_type", "type"]).toLowerCase();
+
+      if (chainType.includes("independent") || chainType.includes("獨立")) return false;
+      if (chainType.includes("chain") || chainType.includes("連鎖")) return true;
+
+      var combined = [
+        getMerchantName(item),
+        getText(item, ["chain_type", "brand", "brand_name", "google_name"])
+      ].join(" ");
+
+      return chainBrands.some(function (brand) {
+        return combined.toLowerCase().includes(brand.toLowerCase());
+      });
+    }
+
+    function getBrand(item) {
+      var combined = [
+        getMerchantName(item),
+        getText(item, ["chain_type", "brand", "brand_name", "google_name"])
+      ].join(" ");
+
+      for (var i = 0; i < chainBrands.length; i++) {
+        if (combined.toLowerCase().includes(chainBrands[i].toLowerCase())) {
+          if (chainBrands[i] === "PARKnSHOP") return "ParknShop";
+          return chainBrands[i];
+        }
+      }
+
+      return isChain(item) ? "Other Chain" : "Independent";
+    }
+
+    function getRatingColor(rating) {
+      if (!rating || rating <= 0) return "#95a5a6";
+      if (rating >= 4) return "#27ae60";
+      if (rating >= 3) return "#f39c12";
+      return "#e74c3c";
+    }
+
+    function getMarkerSize(reviewCount) {
+      if (!reviewCount || reviewCount <= 0) return 7;
+      return Math.min(24, Math.max(8, 7 + Math.log(reviewCount + 1) * 2.6));
+    }
+
+    function safePercent(numerator, denominator) {
+      if (!denominator) return "0%";
+      return Math.round((numerator / denominator) * 100) + "%";
+    }
+
+    /***********************
+     * 3. Filtering
+     ***********************/
+    function applyFilters(data, filters) {
+      filters = filters || {};
+
+      return data.filter(function (item) {
+        if (filters.district && filters.district !== "all") {
+          if (getDistrict(item) !== filters.district) return false;
+        }
+
+        if (filters.chainType && filters.chainType !== "all") {
+          if (filters.chainType === "chain" && !isChain(item)) return false;
+          if (filters.chainType === "independent" && isChain(item)) return false;
+        }
+
+        if (filters.octopus && filters.octopus !== "all") {
+          var target = String(filters.octopus).toLowerCase();
+          var current = getOctopusStatus(item).toLowerCase();
+          if (current !== target) return false;
+        }
+
+        if (filters.minRating && Number(filters.minRating) > 0) {
+          if (getRating(item) < Number(filters.minRating)) return false;
+        }
+
+        return true;
+      });
+    }
+
+    /***********************
+     * 4. Map rendering
+     ***********************/
+    function initMap() {
+      map = L.map("map", {
+        zoomControl: true,
+        attributionControl: true
+      }).setView([22.35, 114.15], 10);
+
+      L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+        maxZoom: 19,
+        attribution: "&copy; OpenStreetMap & CartoDB"
+      }).addTo(map);
+
+      markerLayer = L.layerGroup().addTo(map);
+    }
+
+    function updateMap(data) {
+      if (!map) initMap();
+      markerLayer.clearLayers();
+
+      var valid = data.filter(function (item) {
+        var lat = getLat(item);
+        var lng = getLng(item);
+        return lat && lng && lat > 21.8 && lat < 23 && lng > 113 && lng < 115;
+      });
+
+      valid.forEach(function (item) {
+        var lat = getLat(item);
+        var lng = getLng(item);
+        var rating = getRating(item);
+        var reviews = getReviewCount(item);
+        var octopus = isOctopusYes(item);
+
+        var marker = L.circleMarker([lat, lng], {
+          radius: getMarkerSize(reviews),
+          fillColor: getRatingColor(rating),
+          color: octopus ? "#1e3a5f" : "#ffffff",
+          weight: octopus ? 2 : 1,
+          fillOpacity: 0.72
+        });
+
+        marker.bindPopup(
+          '<div class="popup-name">' + getMerchantName(item) + "</div>" +
+          "District: " + getDistrict(item) + "<br>" +
+          "Rating: " + (rating || "-") + " / Reviews: " + reviews + "<br>" +
+          "Octopus: " + (octopus ? "Supported" : "Not supported / Unknown") + "<br>" +
+          "Address: " + getAddress(item) + "<br>" +
+          '<span class="popup-tag">' + (isChain(item) ? "Chain" : "Independent") + "</span>"
+        );
+
+        markerLayer.addLayer(marker);
+      });
+
+      document.getElementById("kpiGeoStores").textContent = valid.length;
+
+      if (valid.length > 0) {
+        var bounds = L.latLngBounds(
+          valid.map(function (item) {
+            return [getLat(item), getLng(item)];
+          })
+        );
+        map.fitBounds(bounds, { padding: [24, 24] });
+      }
+
+      setTimeout(function () {
+        map.invalidateSize();
+      }, 80);
+    }
+
+    /***********************
+     * 5. KPI rendering
+     ***********************/
+    function updateKpis(data) {
+      var total = data.length;
+      var reviews = data.map(getReviewCount).filter(function (v) { return v > 0; });
+      var avgReview = reviews.length
+        ? Math.round(reviews.reduce(function (a, b) { return a + b; }, 0) / reviews.length)
+        : 0;
+
+      var highPotential = data.filter(function (item) {
+        return !isOctopusYes(item) && getRating(item) >= 4 && getReviewCount(item) >= 20;
+      }).length;
+
+      document.getElementById("kpiVisibleStores").textContent = total;
+      document.getElementById("kpiAvgReview").textContent = avgReview;
+      document.getElementById("kpiHighPotential").textContent = highPotential;
+    }
+
+    /***********************
+     * 6. Chart rendering
+     ***********************/
+    function updateChainChart(data) {
+      var chainCount = data.filter(isChain).length;
+      var independentCount = data.length - chainCount;
+
+      var chart = echarts.init(document.getElementById("chainChart"));
+      chart.setOption({
+        tooltip: {
+          trigger: "axis",
+          formatter: function (params) {
+            var p = params[0];
+            return p.name + "<br/>" + p.value + " merchants (" + safePercent(p.value, data.length) + ")";
+          }
+        },
+        grid: { left: 45, right: 20, top: 20, bottom: 35 },
+        xAxis: {
+          type: "category",
+          data: ["Chain", "Independent"],
+          axisLabel: { fontSize: 11 }
+        },
+        yAxis: {
+          type: "value",
+          name: "Count",
+          nameTextStyle: { fontSize: 10, color: "#6b7280" },
+          splitLine: { lineStyle: { color: "#e5e7eb", type: "dashed" } }
+        },
+        series: [
+          {
+            type: "bar",
+            data: [chainCount, independentCount],
+            barWidth: "48%",
+            itemStyle: {
+              borderRadius: [5, 5, 0, 0],
+              color: function (params) {
+                return params.dataIndex === 0 ? "#27ae60" : "#e74c3c";
+              }
+            },
+            label: {
+              show: true,
+              position: "top",
+              fontSize: 11
+            }
+          }
+        ]
+      });
+    }
+
+    function updateRatingChart(data) {
+      var groups = {
+        "≥ 4.0": 0,
+        "3.0–3.9": 0,
+        "< 3.0": 0,
+        "No rating": 0
+      };
+
+      data.forEach(function (item) {
+        var rating = getRating(item);
+        if (!rating || rating <= 0) groups["No rating"] += 1;
+        else if (rating >= 4) groups["≥ 4.0"] += 1;
+        else if (rating >= 3) groups["3.0–3.9"] += 1;
+        else groups["< 3.0"] += 1;
+      });
+
+      var chart = echarts.init(document.getElementById("ratingChart"));
+      chart.setOption({
+        tooltip: {
+          trigger: "item",
+          formatter: "{b}: {c} merchants ({d}%)"
+        },
+        legend: {
+          bottom: 0,
+          itemWidth: 10,
+          itemHeight: 10,
+          textStyle: { fontSize: 10 }
+        },
+        color: ["#27ae60", "#f39c12", "#e74c3c", "#95a5a6"],
+        series: [
+          {
+            type: "pie",
+            radius: ["42%", "68%"],
+            center: ["50%", "43%"],
+            avoidLabelOverlap: true,
+            label: {
+              formatter: "{d}%",
+              fontSize: 10
+            },
+            data: Object.keys(groups).map(function (key) {
+              return { name: key, value: groups[key] };
+            })
+          }
+        ]
+      });
+    }
+
+    function updateBrandChart(data) {
+      var counts = {};
+
+      data.forEach(function (item) {
+        var brand = getBrand(item);
+        if (brand !== "Independent") {
+          counts[brand] = (counts[brand] || 0) + 1;
+        }
+      });
+
+      var sorted = Object.keys(counts)
+        .map(function (brand) {
+          return { brand: brand, count: counts[brand] };
+        })
+        .sort(function (a, b) {
+          return b.count - a.count;
+        })
+        .slice(0, 10);
+
+      var chart = echarts.init(document.getElementById("brandChart"));
+
+      if (sorted.length === 0) {
+        document.getElementById("brandChart").innerHTML =
+          '<div class="empty-state">No chain brand detected under current filters.</div>';
+        return;
+      }
+
+      chart.setOption({
+        tooltip: {
+          trigger: "axis",
+          axisPointer: { type: "shadow" }
+        },
+        grid: { left: 85, right: 25, top: 15, bottom: 25 },
+        xAxis: {
+          type: "value",
+          name: "Stores",
+          nameTextStyle: { fontSize: 10, color: "#6b7280" },
+          splitLine: { lineStyle: { color: "#e5e7eb", type: "dashed" } }
+        },
+        yAxis: {
+          type: "category",
+          data: sorted.map(function (d) { return d.brand; }).reverse(),
+          axisLabel: { fontSize: 11 }
+        },
+        series: [
+          {
+            type: "bar",
+            data: sorted.map(function (d) { return d.count; }).reverse(),
+            barWidth: "55%",
+            itemStyle: {
+              color: "#3498db",
+              borderRadius: [0, 5, 5, 0]
+            },
+            label: {
+              show: true,
+              position: "right",
+              fontSize: 11
+            }
+          }
+        ]
+      });
+    }
+
+    function updateOpportunityChart(data) {
+      var districtMap = {};
+
+      data.forEach(function (item) {
+        var isHighPotential =
+          !isOctopusYes(item) && getRating(item) >= 4 && getReviewCount(item) >= 20;
+
+        if (!isHighPotential) return;
+
+        var district = getDistrict(item);
+        if (!districtMap[district]) {
+          districtMap[district] = {
+            count: 0,
+            reviews: 0
+          };
+        }
+
+        districtMap[district].count += 1;
+        districtMap[district].reviews += getReviewCount(item);
+      });
+
+      var sorted = Object.keys(districtMap)
+        .map(function (district) {
+          return {
+            district: district,
+            count: districtMap[district].count,
+            reviews: districtMap[district].reviews
+          };
+        })
+        .sort(function (a, b) {
+          return b.reviews - a.reviews;
+        })
+        .slice(0, 10);
+
+      var chart = echarts.init(document.getElementById("opportunityChart"));
+
+      if (sorted.length === 0) {
+        document.getElementById("opportunityChart").innerHTML =
+          '<div class="empty-state">No high-potential non-Octopus stores under current filters.<br>Rule: rating ≥ 4.0 and reviews ≥ 20.</div>';
+        return;
+      }
+
+      chart.setOption({
+        tooltip: {
+          trigger: "axis",
+          axisPointer: { type: "shadow" },
+          formatter: function (params) {
+            var idx = params[0].dataIndex;
+            var row = sorted.slice().reverse()[idx];
+            return (
+              row.district +
+              "<br/>High-potential stores: " +
+              row.count +
+              "<br/>Total reviews: " +
+              row.reviews
+            );
+          }
+        },
+        grid: { left: 95, right: 30, top: 15, bottom: 25 },
+        xAxis: {
+          type: "value",
+          name: "Review volume",
+          nameTextStyle: { fontSize: 10, color: "#6b7280" },
+          splitLine: { lineStyle: { color: "#e5e7eb", type: "dashed" } }
+        },
+        yAxis: {
+          type: "category",
+          data: sorted.map(function (d) { return d.district; }).reverse(),
+          axisLabel: { fontSize: 11 }
+        },
+        series: [
+          {
+            type: "bar",
+            data: sorted.map(function (d) { return d.reviews; }).reverse(),
+            barWidth: "55%",
+            itemStyle: {
+              color: "#1e3a5f",
+              borderRadius: [0, 5, 5, 0]
+            },
+            label: {
+              show: true,
+              position: "right",
+              fontSize: 10,
+              formatter: function (params) {
+                var row = sorted.slice().reverse()[params.dataIndex];
+                return row.count + " stores";
+              }
+            }
+          }
+        ]
+      });
+    }
+
+    function resizeCharts() {
+      ["chainChart", "ratingChart", "brandChart", "opportunityChart"].forEach(function (id) {
+        var instance = echarts.getInstanceByDom(document.getElementById(id));
+        if (instance) instance.resize();
+      });
+
+      if (map) {
+        setTimeout(function () {
+          map.invalidateSize();
+        }, 80);
+      }
+    }
+
+    /***********************
+     * 7. Main render
+     ***********************/
+    function renderAll(data) {
+      currentData = data;
+
+      document.getElementById("dataStatus").textContent =
+        data.length + " merchants displayed";
+
+      updateKpis(data);
+      updateMap(data);
+      updateChainChart(data);
+      updateRatingChart(data);
+      updateBrandChart(data);
+      updateOpportunityChart(data);
+
+      resizeCharts();
+    }
+
+    function refreshWithFilters(filters) {
+      latestFilters = filters || {};
+      var filtered = applyFilters(originalData, latestFilters);
+      renderAll(filtered);
+    }
+
+    /***********************
+     * 8. Load data
+     ***********************/
+    function normalizeLoadedData(raw) {
+      if (Array.isArray(raw)) return raw;
+
+      if (raw && Array.isArray(raw.data)) return raw.data;
+      if (raw && Array.isArray(raw.records)) return raw.records;
+      if (raw && Array.isArray(raw.pharmacies)) return raw.pharmacies;
+
+      return [];
+    }
+
+    function loadData() {
+      return fetch("data.json")
+        .then(function (response) {
+          if (!response.ok) {
+            throw new Error("Cannot load data.json");
+          }
+          return response.json();
+        })
+        .then(function (raw) {
+          originalData = normalizeLoadedData(raw);
+          document.getElementById("dataStatus").textContent =
+            originalData.length + " merchants loaded";
+          refreshWithFilters(latestFilters);
+        })
+        .catch(function (error) {
+          console.error(error);
+          document.getElementById("dataStatus").textContent = "data.json not found";
+          document.querySelector(".region-b-container").insertAdjacentHTML(
+            "beforeend",
+            '<div class="empty-state" style="margin-top:16px;">' +
+              "Region B is ready, but data.json was not loaded.<br>" +
+              "Place <b>data.json</b> in the same folder as this HTML file, then open it through a local server." +
+            "</div>"
+          );
+          initMap();
+        });
+    }
+
+    /***********************
+     * 9. Communication with parent index.html
+     ***********************/
+    window.addEventListener("message", function (event) {
+      if (!event.data || event.data.type !== "FILTER_CHANGE") return;
+      refreshWithFilters(event.data.filters || {});
+    });
+
+    // Optional: allow parent or data-loader.js to call this directly
+    window.renderRegionB = function (data) {
+      originalData = normalizeLoadedData(data);
+      refreshWithFilters(latestFilters);
+    };
+
+    window.addEventListener("resize", resizeCharts);
+
+    document.addEventListener("DOMContentLoaded", function () {
+      initMap();
+      loadData();
+    });
+  </script>
+</body>
+</html>
