@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HK Pharmacy Dashboard</title>
+  <link rel="stylesheet" href="css/common.css">
+  <style>
+    .iframe-panel-b {
+      grid-column: 1 / -1;
+      min-height: 980px;
+    }
+
+    .placeholder-panel {
+      min-height: 260px;
+    }
+  </style>
+</head>
+<body class="dashboard-shell">
+  <header class="dashboard-header">
+    <div>
+      <p class="eyebrow">HK Pharmacy Sector</p>
+      <h1>Octopus Payment Dashboard</h1>
+    </div>
+    <div class="header-meta">
+      <span id="activeFilterCount">All merchants</span>
+      <span>Region A + B</span>
+    </div>
+  </header>
+
+  <main class="iframe-layout">
+    <section class="iframe-panel iframe-panel-a">
+      <iframe
+        id="regionAFrame"
+        title="Region A Filters and Statistics"
+        src="region-a.html"
+      ></iframe>
+    </section>
+
+    <section class="iframe-panel iframe-panel-b">
+      <iframe
+        id="regionBFrame"
+        title="Region B Map and Commercial Analysis"
+        src="region-b.html"
+      ></iframe>
+    </section>
+
+    <section class="iframe-panel placeholder-panel">
+      <h2>Region C</h2>
+      <p>Service insights</p>
+    </section>
+  </main>
+
+  <script>
+    var latestFilters = {
+      district: "all",
+      chainType: "all",
+      octopus: "all",
+      minRating: 0
+    };
+
+    function countActiveFilters(filters) {
+      var active = 0;
+      ["district", "chainType", "octopus"].forEach(function (key) {
+        if (filters[key] && filters[key] !== "all") active += 1;
+      });
+      if (filters.minRating && Number(filters.minRating) > 0) active += 1;
+      return active;
+    }
+
+    function updateFilterSummary(filters) {
+      var active = countActiveFilters(filters);
+      document.getElementById("activeFilterCount").textContent =
+        active === 0 ? "All merchants" : active + " active filters";
+    }
+
+    function forwardFiltersToRegionB(filters) {
+      var frame = document.getElementById("regionBFrame");
+      if (!frame || !frame.contentWindow) return;
+      frame.contentWindow.postMessage(
+        {
+          type: "FILTER_CHANGE",
+          filters: filters
+        },
+        "*"
+      );
+    }
+
+    window.addEventListener("message", function (event) {
+      if (!event.data || event.data.type !== "FILTER_CHANGE") return;
+      latestFilters = event.data.filters || latestFilters;
+      updateFilterSummary(latestFilters);
+      forwardFiltersToRegionB(latestFilters);
+    });
+
+    document.getElementById("regionBFrame").addEventListener("load", function () {
+      forwardFiltersToRegionB(latestFilters);
+    });
+  </script>
+</body>
+</html>

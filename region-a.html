@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A - 篩選與統計</title>
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/region-a.css">
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js" defer></script>
+  <script src="js/data-loader.js" defer></script>
+  <script src="js/region-a.js" defer></script>
+</head>
+<body>
+  <main class="region-a-container">
+    <section class="filters-bar" aria-label="Dashboard filters">
+      <label>
+        <span>區域</span>
+        <select id="districtFilter">
+          <option value="all">全部區域</option>
+        </select>
+      </label>
+
+      <label>
+        <span>商戶類型</span>
+        <select id="chainFilter">
+          <option value="all">全部類型</option>
+          <option value="chain">連鎖 / 品牌</option>
+          <option value="independent">獨立商戶</option>
+        </select>
+      </label>
+
+      <label>
+        <span>八達通</span>
+        <select id="octopusFilter">
+          <option value="all">全部狀態</option>
+          <option value="Y">已標記支援</option>
+          <option value="N">未標記支援</option>
+        </select>
+      </label>
+
+      <label>
+        <span>最低評分</span>
+        <input type="number" id="ratingMin" min="0" max="5" step="0.5" value="0">
+      </label>
+
+      <button id="resetBtn" type="button">重設</button>
+    </section>
+
+    <section class="stats-row" aria-label="Summary metrics">
+      <article class="stat-card">
+        <span id="totalCount">0</span>
+        <label>總商戶數</label>
+      </article>
+      <article class="stat-card">
+        <span id="octopusRate">0%</span>
+        <label>八達通比例</label>
+      </article>
+      <article class="stat-card">
+        <span id="avgRating">-</span>
+        <label>平均評分</label>
+      </article>
+      <article class="stat-card">
+        <span id="chainCount">0</span>
+        <label>連鎖 / 品牌</label>
+      </article>
+    </section>
+
+    <section class="chart-section">
+      <div class="section-heading">
+        <h2>區域分布</h2>
+        <span id="chartSubtitle">按商戶數量排序</span>
+      </div>
+      <div id="districtChart" class="district-chart" role="img" aria-label="District merchant count chart"></div>
+    </section>
+  </main>
+</body>
+</html>
