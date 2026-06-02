@@ -1,0 +1,317 @@
+/* region-c.css - 符合規格表 */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', 'Inter', system-ui, sans-serif;
+    background: #f8f9fa;
+}
+
+.c-dashboard {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px;
+}
+
+/* 標題區 */
+.c-header {
+    margin-bottom: 28px;
+}
+
+.c-header h1 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #1a1a2e;
+}
+
+.c-header h1 i {
+    color: #27ae60;
+    margin-right: 12px;
+}
+
+.c-header p {
+    color: #6c757d;
+    font-size: 14px;
+    margin-top: 6px;
+}
+
+/* 卡片行 */
+.c-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.c-card, .c-card-full {
+    background: white;
+    border-radius: 20px;
+    padding: 20px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.c-card:hover, .c-card-full:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+
+.c-card-full {
+    grid-column: span 2;
+}
+
+.c-card h3, .c-card-full h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: #2c3e50;
+    border-left: 4px solid #27ae60;
+    padding-left: 12px;
+}
+
+.c-card h3 i, .c-card-full h3 i {
+    margin-right: 8px;
+    color: #27ae60;
+}
+
+.chart-box {
+    width: 100%;
+}
+
+.chart-note {
+    font-size: 11px;
+    color: #adb5bd;
+    text-align: center;
+    margin-top: 12px;
+}
+
+.mt-2 {
+    margin-top: 8px;
+}
+
+/* ===== NFC 進度條 ===== */
+.progress-container {
+    margin: 20px 0;
+}
+
+.progress-label {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.progress-value {
+    color: #27ae60;
+    font-weight: 700;
+}
+
+.progress-bar-bg {
+    background-color: #e9ecef;
+    border-radius: 30px;
+    height: 24px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    background: linear-gradient(90deg, #20c997, #0dcaf0);
+    width: 0%;
+    height: 100%;
+    border-radius: 30px;
+    transition: width 0.6s ease;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 10px;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+/* ===== 商戶類型 / 區域 / 連鎖 水平條 ===== */
+.type-bars-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.type-bar-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.type-bar-item:hover {
+    transform: translateX(4px);
+}
+
+.type-label {
+    width: 110px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #495057;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.type-bar-bg {
+    flex: 1;
+    background-color: #e9ecef;
+    border-radius: 20px;
+    height: 28px;
+    overflow: hidden;
+}
+
+.type-bar-fill {
+    height: 100%;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 8px;
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+    transition: width 0.3s;
+}
+
+.type-count {
+    width: 50px;
+    text-align: right;
+    font-size: 12px;
+    font-weight: 600;
+    color: #6c757d;
+}
+
+/* ===== 特殊標記表格 ===== */
+.table-container {
+    border-radius: 16px;
+    border: 1px solid #e9ecef;
+}
+
+.special-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.special-table th {
+    background-color: #f8f9fa;
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    color: #495057;
+    border-bottom: 2px solid #dee2e6;
+    position: sticky;
+    top: 0;
+    background: #f8f9fa;
+}
+
+.special-table td {
+    padding: 10px 16px;
+    border-bottom: 1px solid #e9ecef;
+    color: #212529;
+}
+
+.special-table tbody tr:hover {
+    background-color: #f0f8ff;
+    cursor: pointer;
+}
+
+.special-table tbody tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+.special-table tbody tr:nth-child(odd) {
+    background-color: white;
+}
+
+.remark-badge {
+    display: inline-block;
+    background-color: #ffc107;
+    color: #856404;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+/* ===== 數據摘要 ===== */
+.summary-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.summary-label {
+    font-size: 13px;
+    color: #6c757d;
+}
+
+.summary-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: #27ae60;
+}
+
+/* 洞察列表 */
+.insights-list {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+.insights-list li {
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 13px;
+    color: #333;
+    line-height: 1.5;
+}
+
+.insights-list li i {
+    color: #27ae60;
+    margin-top: 2px;
+}
+
+/* 響應式 */
+@media (max-width: 1024px) {
+    .c-row {
+        grid-template-columns: 1fr;
+    }
+    .c-card-full {
+        grid-column: span 1;
+    }
+    .summary-stats {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .c-dashboard {
+        padding: 16px;
+    }
+    .type-label {
+        width: 80px;
+        font-size: 11px;
+    }
+}
