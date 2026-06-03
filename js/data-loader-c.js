@@ -1,4 +1,4 @@
-// data-loader-c.js - 从你的 Excel 数据加载并计算统计（修复版）
+// data-loader-c.js - load pharmacy data and calculate statistics
 
 let globalAggregated = null;
 let globalPharmacyData = [];
@@ -10,7 +10,7 @@ async function loadPharmacyData() {
         
         let rawData = await response.json();
         
-        // 处理你的数据格式
+        // Normalize source data format
         if (Array.isArray(rawData)) {
             globalPharmacyData = rawData;
         } else if (rawData.data && Array.isArray(rawData.data)) {
@@ -22,7 +22,7 @@ async function loadPharmacyData() {
         console.log(`Loaded ${globalPharmacyData.length} pharmacy records`);
         console.log('Sample record:', globalPharmacyData[0]);
         
-        // 聚合统计数据
+        // Aggregate statistics
         globalAggregated = aggregateData(globalPharmacyData);
         
         return globalAggregated;
@@ -36,11 +36,11 @@ async function loadPharmacyData() {
 function aggregateData(data) {
     const total = data.length;
     
-    // 1. 八达通支付统计 (字段: octopus_payment_yn)
+    // 1. Octopus payment statistics (field: octopus_payment_yn)
     const octopusSupported = data.filter(d => d.octopus_payment_yn === 'Y' || d.octopus_payment_yn === true).length;
     const octopusPercentage = total > 0 ? Math.round((octopusSupported / total) * 100) : 0;
     
-    // 2. 信用卡/扣账卡统计
+    // 2. Credit/debit card statistics
     let creditCards = 0;
     let debitCards = 0;
     
@@ -56,14 +56,14 @@ function aggregateData(data) {
         }
     });
     
-    // 如果信用卡数据全是0，使用基于总商户数的估算
+    // If card fields are all zero, use a total-based estimate
     const useDemoCardData = creditCards === 0 && debitCards === 0;
     if (useDemoCardData) {
         creditCards = Math.round(total * 0.49);
         debitCards = Math.round(total * 0.50);
     }
     
-    // 3. 现金支付统计
+    // 3. Cash payment statistics
     let cashOnly = 0;
     data.forEach(d => {
         const co = d.google_accepts_cash_only;
@@ -73,7 +73,7 @@ function aggregateData(data) {
     });
     const cashOnlyPercentage = total > 0 ? Math.round((cashOnly / total) * 100) : 0;
     
-    // 4. NFC支付统计
+    // 4. NFC payment statistics
     let nfcSupported = 0;
     data.forEach(d => {
         const nfc = d.google_accepts_nfc;
@@ -83,7 +83,7 @@ function aggregateData(data) {
     });
     const nfcPercentage = total > 0 ? Math.round((nfcSupported / total) * 100) : 0;
     
-    // 5. 营业时间统计 (修复版)
+    // 5. Opening hours statistics
     let weekdayOnly = 0;
     let weekFull = 0;
     let limited = 0;
@@ -99,20 +99,20 @@ function aggregateData(data) {
         
         const hoursStr = String(hours).toLowerCase();
         
-        // 检查是否包含周末营业
-        const hasSaturday = hoursStr.includes('saturday') || hoursStr.includes('周六') || hoursStr.includes('礼拜六');
-        const hasSunday = hoursStr.includes('sunday') || hoursStr.includes('周日') || hoursStr.includes('礼拜日');
+        // Check whether weekend hours are present
+        const hasSaturday = hoursStr.includes('saturday');
+        const hasSunday = hoursStr.includes('sunday');
         const hasWeekend = hasSaturday || hasSunday;
         
-        // 检查是否包含工作日
-        const hasWeekday = hoursStr.includes('monday') || hoursStr.includes('周一') || 
-                          hoursStr.includes('tuesday') || hoursStr.includes('周二') ||
-                          hoursStr.includes('wednesday') || hoursStr.includes('周三') ||
-                          hoursStr.includes('thursday') || hoursStr.includes('周四') ||
-                          hoursStr.includes('friday') || hoursStr.includes('周五');
+        // Check whether weekday hours are present
+        const hasWeekday = hoursStr.includes('monday') ||
+                          hoursStr.includes('tuesday') ||
+                          hoursStr.includes('wednesday') ||
+                          hoursStr.includes('thursday') ||
+                          hoursStr.includes('friday');
         
-        // 检查是否24小时营业
-        const is24Hours = hoursStr.includes('24 hours') || hoursStr.includes('24小時');
+        // Check whether the merchant is open 24 hours
+        const is24Hours = hoursStr.includes('24 hours');
         
         if (is24Hours || (hasWeekend && hasWeekday)) {
             weekFull++;
@@ -125,7 +125,7 @@ function aggregateData(data) {
         }
     });
     
-    // 如果所有数据都是 unknown，使用基于八达通数据的估算
+    // If all values are unknown, use an Octopus-based estimate
     let finalWeekdayOnly = weekdayOnly;
     let finalWeekFull = weekFull;
     let finalLimited = limited;
@@ -144,17 +144,17 @@ function aggregateData(data) {
         total: data.length 
     });
     
-    // 6. 商户类型统计
+    // 6. Merchant type statistics
     const typeCount = new Map();
     data.forEach(d => {
-        let type = d.google_primary_type || d.chain_type || d.licence_type || '其他';
+        let type = d.google_primary_type || d.chain_type || d.licence_type || 'Other';
         
-        if (type === 'pharmacy' || type === 'drugstore') type = '藥房';
-        else if (type === 'supermarket') type = '超市';
-        else if (type === 'convenience_store') type = '便利店';
-        else if (type === 'store') type = '商店';
-        else if (type === 'manufacturer') type = '藥廠/批發';
-        else if (type === 'point_of_interest') type = '其他';
+        if (type === 'pharmacy' || type === 'drugstore') type = 'Pharmacy';
+        else if (type === 'supermarket') type = 'Supermarket';
+        else if (type === 'convenience_store') type = 'Convenience Store';
+        else if (type === 'store') type = 'Store';
+        else if (type === 'manufacturer') type = 'Manufacturer / Wholesaler';
+        else if (type === 'point_of_interest') type = 'Other';
         
         typeCount.set(type, (typeCount.get(type) || 0) + 1);
     });
@@ -163,10 +163,10 @@ function aggregateData(data) {
         .slice(0, 8)
         .map(([name, count]) => ({ name, count, percentage: Math.round((count / total) * 100) }));
     
-    // 7. 区域统计
+    // 7. District statistics
     const districtCount = new Map();
     data.forEach(d => {
-        const district = d.district_18 || '未知';
+        const district = d.district_18 || 'Unknown';
         districtCount.set(district, (districtCount.get(district) || 0) + 1);
     });
     const districtData = Array.from(districtCount.entries())
@@ -174,7 +174,7 @@ function aggregateData(data) {
         .slice(0, 8)
         .map(([name, count]) => ({ name, count, percentage: Math.round((count / total) * 100) }));
     
-    // 8. 连锁类型统计
+    // 8. Chain type statistics
     const chainCount = new Map();
     data.forEach(d => {
         let chain = d.chain_type || 'Independent / Others';
@@ -185,7 +185,7 @@ function aggregateData(data) {
         .slice(0, 6)
         .map(([name, count]) => ({ name, count, percentage: Math.round((count / total) * 100) }));
     
-    // 9. 特殊标记商户
+    // 9. Special-flagged merchants
     const specialMerchants = data.filter(d => d.manual_remark && d.manual_remark.trim() !== '')
         .slice(0, 30)
         .map(m => ({
@@ -195,7 +195,7 @@ function aggregateData(data) {
             remark: m.manual_remark || ''
         }));
     
-    // 10. 关键洞察
+    // 10. Key insights
     const insights = generateInsights(total, octopusPercentage, nfcPercentage, districtData, chainData);
     
     return {
@@ -220,34 +220,34 @@ function aggregateData(data) {
 function generateInsights(total, octopusRate, nfcRate, districtData, chainData) {
     const insights = [];
     
-    insights.push(`📊 總共分析 ${total} 間商戶，八達通接受率為 ${octopusRate}%`);
+    insights.push(`Analyzed ${total} merchants; Octopus acceptance is ${octopusRate}%`);
     
     if (octopusRate > 60) {
-        insights.push(`✅ 八達通在藥房行業普及率良好（${octopusRate}%），仍有提升空間`);
+        insights.push(`Octopus penetration in the pharmacy sector is solid (${octopusRate}%), with room for further growth`);
     } else {
-        insights.push(`📈 八達通接受率 ${octopusRate}%，建議加強推廣以提升市場份額`);
+        insights.push(`Octopus acceptance is ${octopusRate}%; stronger promotion could increase market share`);
     }
     
     if (districtData.length > 0) {
         const topDistrict = districtData[0];
-        insights.push(`📍 ${topDistrict.name} 是商戶最密集區域（${topDistrict.count}間，佔比${topDistrict.percentage}%）`);
+        insights.push(`${topDistrict.name} has the highest merchant concentration (${topDistrict.count}, ${topDistrict.percentage}% share)`);
     }
     
     const topChains = chainData.slice(0, 3).map(c => c.name).join('、');
-    insights.push(`🏪 主要連鎖品牌：${topChains}，獨立商戶仍是市場主力`);
+    insights.push(`Major chain brands: ${topChains}; independent merchants remain the core of the market`);
     
     if (nfcRate < 30) {
-        insights.push(`📱 NFC支付接受率僅 ${nfcRate}%，是非接觸式支付的重要增長機會`);
+        insights.push(`NFC acceptance is only ${nfcRate}%, creating a meaningful contactless payment growth opportunity`);
     } else {
-        insights.push(`📱 NFC支付接受率 ${nfcRate}%，非接觸式支付逐漸普及`);
+        insights.push(`NFC acceptance is ${nfcRate}%, and contactless payments are gaining adoption`);
     }
     
-    insights.push(`💡 建議針對高流量區域（如 ${districtData[0]?.name || '主要區域'}）優先推廣八達通服務`);
+    insights.push(`Prioritize Octopus promotion in high-traffic districts such as ${districtData[0]?.name || 'the leading district'}`);
     
     return insights;
 }
 
-// 演示数据
+// Demo data
 function getDemoData() {
     const total = 1197;
     return {
@@ -262,10 +262,10 @@ function getDemoData() {
         nfcPercentage: 53,
         hoursData: { weekdayOnly: 263, weekFull: 682, limited: 252, total: total },
         merchantTypes: [
-            { name: '藥房', count: 485, percentage: 41 },
-            { name: '超市', count: 398, percentage: 33 },
-            { name: '便利店', count: 214, percentage: 18 },
-            { name: '商店', count: 100, percentage: 8 }
+            { name: 'Pharmacy', count: 485, percentage: 41 },
+            { name: 'Supermarket', count: 398, percentage: 33 },
+            { name: 'Convenience Store', count: 214, percentage: 18 },
+            { name: 'Store', count: 100, percentage: 8 }
         ],
         districtData: [
             { name: 'TSUEN WAN', count: 559, percentage: 47 },
@@ -290,14 +290,14 @@ function getDemoData() {
             { name: 'H.A.I.R 3000', district: 'SAI KUNG', chain: 'Independent / Others', remark: 'Hair' }
         ],
         insights: [
-            '📊 總共分析 1197 間商戶，八達通接受率為 59%',
-            '📍 TSUEN WAN 是商戶最密集區域（559間，佔比47%）',
-            '🏪 獨立商戶仍是市場主力（61%），連鎖品牌有增長空間',
-            '📱 NFC支付接受率 53%，非接觸式支付逐漸普及',
-            '💡 建議針對高流量區域優先推廣八達通服務'
+            'Analyzed 1197 merchants; Octopus acceptance is 59%',
+            'TSUEN WAN has the highest merchant concentration (559, 47% share)',
+            'Independent merchants remain the core of the market (61%), while chain brands still have room to grow',
+            'NFC acceptance is 53%, and contactless payments are gaining adoption',
+            'Prioritize Octopus promotion in high-traffic districts'
         ]
     };
 }
 
-// 自动加载
+// Auto-load
 loadPharmacyData();

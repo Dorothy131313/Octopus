@@ -1,4 +1,4 @@
-// region-c.js - 服务洞察仪表板（修复版）
+// region-c.js - service insights dashboard
 
 let aggregatedData = null;
 
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     console.log('Rendering with data:', aggregatedData);
     
-    // 渲染所有图表
+    // Render all charts
     renderOctopusChart();
     renderCardChart();
     renderCashChart();
@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     renderChainChart();
     renderSpecialRemarksTable();
     
-    // 更新摘要和洞察
+    // Update summary and insights
     updateSummaryAndInsights(aggregatedData);
 });
 
@@ -37,14 +37,14 @@ function renderOctopusChart() {
     
     chart.setOption({
         title: { 
-            text: `八達通接受率: ${aggregatedData.octopusPercentage}%`, 
+            text: `Octopus Acceptance Rate: ${aggregatedData.octopusPercentage}%`, 
             left: 'center', 
             top: 0, 
             textStyle: { fontSize: 12, fontWeight: 'normal' } 
         },
         tooltip: { 
             trigger: 'item', 
-            formatter: '{b}: {d}% ({c}間)' 
+            formatter: '{b}: {d}% ({c})' 
         },
         color: ['#27ae60', '#95a5a6'],
         series: [{
@@ -52,8 +52,8 @@ function renderOctopusChart() {
             radius: '55%',
             center: ['50%', '55%'],
             data: [
-                { name: '支持八達通', value: supported },
-                { name: '不支持', value: notSupported }
+                { name: 'Octopus Supported', value: supported },
+                { name: 'Not Supported', value: notSupported }
             ],
             label: { 
                 show: true, 
@@ -72,11 +72,11 @@ function renderCardChart() {
         tooltip: { 
             trigger: 'axis', 
             axisPointer: { type: 'shadow' },
-            formatter: '{b}: {c} 間商戶'
+            formatter: '{b}: {c} merchants'
         },
         color: ['#9b59b6', '#8e44ad'],
         title: { 
-            text: '信用卡/扣帳卡接受情況', 
+            text: 'Credit / Debit Card Acceptance', 
             left: 'center', 
             top: 0, 
             textStyle: { fontSize: 12 } 
@@ -84,12 +84,12 @@ function renderCardChart() {
         grid: { top: 40, bottom: 20, left: 60, right: 30 },
         xAxis: { 
             type: 'category', 
-            data: ['信用卡', '扣帳卡'],
+            data: ['Credit Card', 'Debit Card'],
             axisLabel: { fontSize: 12 }
         },
         yAxis: { 
             type: 'value', 
-            name: '商戶數量',
+            name: 'Merchant Count',
             nameLocation: 'middle',
             nameGap: 45,
             min: 0
@@ -119,11 +119,11 @@ function renderCashChart() {
     chart.setOption({
         tooltip: { 
             trigger: 'item', 
-            formatter: '{b}: {d}% ({c}間)' 
+            formatter: '{b}: {d}% ({c})' 
         },
         color: ['#f1c40f', '#e67e22'],
         title: { 
-            text: `僅收現金比例: ${aggregatedData.cashOnlyPercentage}%`, 
+            text: `Cash-Only Share: ${aggregatedData.cashOnlyPercentage}%`, 
             left: 'center', 
             top: 0, 
             textStyle: { fontSize: 12 } 
@@ -133,8 +133,8 @@ function renderCashChart() {
             radius: ['40%', '65%'],
             center: ['50%', '55%'],
             data: [
-                { name: '僅收現金', value: cashOnly },
-                { name: '接受其他支付', value: others }
+                { name: 'Cash Only', value: cashOnly },
+                { name: 'Other Payment Accepted', value: others }
             ],
             label: { 
                 show: true, 
@@ -164,17 +164,17 @@ function renderHoursChart() {
             trigger: 'axis', 
             axisPointer: { type: 'shadow' },
             formatter: function(params) {
-                let result = '營業時間分佈<br/>';
+                let result = 'Opening Hours Distribution<br/>';
                 params.forEach(p => {
                     const percent = ((p.value / total) * 100).toFixed(1);
-                    result += `${p.marker} ${p.seriesName}: ${p.value} 間 (${percent}%)<br/>`;
+                    result += `${p.marker} ${p.seriesName}: ${p.value} (${percent}%)<br/>`;
                 });
                 return result;
             }
         },
         color: ['#27ae60', '#3498db', '#95a5a6'],
         title: { 
-            text: `營業時間分佈 (總商戶: ${total})`, 
+            text: `Opening Hours Distribution (Total Merchants: ${total})`, 
             left: 'center', 
             top: 0, 
             textStyle: { fontSize: 12 } 
@@ -182,12 +182,12 @@ function renderHoursChart() {
         grid: { top: 50, bottom: 20, left: 60, right: 30 },
         xAxis: { 
             type: 'category', 
-            data: ['營業時間'],
+            data: ['Opening Hours'],
             axisLabel: { fontSize: 12 }
         },
         yAxis: { 
             type: 'value', 
-            name: '商戶數量',
+            name: 'Merchant Count',
             nameLocation: 'middle',
             nameGap: 45,
             min: 0,
@@ -195,25 +195,25 @@ function renderHoursChart() {
         },
         series: [
             { 
-                name: '全週營業', 
+                name: 'Open All Week', 
                 type: 'bar', 
                 data: [weekFull], 
                 itemStyle: { borderRadius: [8, 0, 0, 8], color: '#27ae60' },
-                label: { show: true, position: 'inside', formatter: '{c} 間' } 
+                label: { show: true, position: 'inside', formatter: '{c}' } 
             },
             { 
-                name: '僅工作日', 
+                name: 'Weekdays Only', 
                 type: 'bar', 
                 data: [weekdayOnly], 
                 itemStyle: { borderRadius: [0, 0, 0, 0], color: '#3498db' },
-                label: { show: true, position: 'inside', formatter: '{c} 間' } 
+                label: { show: true, position: 'inside', formatter: '{c}' } 
             },
             { 
-                name: '時段有限/未知', 
+                name: 'Limited / Unknown', 
                 type: 'bar', 
                 data: [limited], 
                 itemStyle: { borderRadius: [0, 8, 8, 0], color: '#95a5a6' },
-                label: { show: true, position: 'inside', formatter: '{c} 間' } 
+                label: { show: true, position: 'inside', formatter: '{c}' } 
             }
         ]
     });
@@ -230,7 +230,7 @@ function renderMerchantTypeBars() {
         const color = colors[idx % colors.length];
         const div = document.createElement('div');
         div.className = 'type-bar-item';
-        div.onclick = () => alert(`篩選：${type.name}\n共 ${type.count} 間商戶 (佔比 ${type.percentage}%)`);
+        div.onclick = () => alert(`Filter: ${type.name}\nTotal: ${type.count} merchants (share ${type.percentage}%)`);
         
         div.innerHTML = `
             <span class="type-label" title="${type.name}">${type.name}</span>
@@ -256,7 +256,7 @@ function renderDistrictChart() {
         const color = colors[idx % colors.length];
         const div = document.createElement('div');
         div.className = 'type-bar-item';
-        div.onclick = () => alert(`${district.name}\n共 ${district.count} 間商戶 (佔比 ${district.percentage}%)`);
+        div.onclick = () => alert(`${district.name}\nTotal: ${district.count} merchants (share ${district.percentage}%)`);
         
         div.innerHTML = `
             <span class="type-label" style="width: 100px;" title="${district.name}">${district.name}</span>
@@ -282,7 +282,7 @@ function renderChainChart() {
         const color = colors[idx % colors.length];
         const div = document.createElement('div');
         div.className = 'type-bar-item';
-        div.onclick = () => alert(`${chain.name}\n共 ${chain.count} 間商戶 (佔比 ${chain.percentage}%)`);
+        div.onclick = () => alert(`${chain.name}\nTotal: ${chain.count} merchants (share ${chain.percentage}%)`);
         
         div.innerHTML = `
             <span class="type-label" style="width: 130px;" title="${chain.name}">${chain.name}</span>
@@ -303,13 +303,13 @@ function renderSpecialRemarksTable() {
     tbody.innerHTML = '';
     
     if (!aggregatedData.specialMerchants || aggregatedData.specialMerchants.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4">暫無特殊標記商戶</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4">No special-flagged merchants</td></tr>';
         return;
     }
     
     aggregatedData.specialMerchants.forEach(merchant => {
         const row = tbody.insertRow();
-        row.onclick = () => alert(`詳情：\n名稱：${merchant.name}\n區域：${merchant.district}\n連鎖：${merchant.chain}\n備註：${merchant.remark}`);
+        row.onclick = () => alert(`Details:\nName: ${merchant.name}\nDistrict: ${merchant.district}\nChain: ${merchant.chain}\nRemark: ${merchant.remark}`);
         
         row.insertCell(0).innerText = merchant.name.length > 40 ? merchant.name.substring(0, 40) + '...' : merchant.name;
         row.insertCell(1).innerText = merchant.district;
@@ -319,7 +319,7 @@ function renderSpecialRemarksTable() {
 }
 
 function updateSummaryAndInsights(data) {
-    // 更新摘要卡片
+    // Update summary cards
     const totalEl = document.getElementById('totalMerchants');
     const totalOctopusEl = document.getElementById('totalOctopus');
     const octopusRateEl = document.getElementById('octopusRate');
@@ -332,17 +332,17 @@ function updateSummaryAndInsights(data) {
     if (nfcRateEl) nfcRateEl.innerText = data.nfcPercentage + '%';
     if (specialCountEl) specialCountEl.innerText = data.specialMerchants.length;
     
-    // 更新洞察列表
+    // Update insights list
     const insightsList = document.getElementById('insightsList');
     if (insightsList) {
         insightsList.innerHTML = '';
         
         const insights = data.insights || [
-            `📊 總共分析 ${data.total} 間商戶，八達通接受率為 ${data.octopusPercentage}%`,
-            `📍 ${data.districtData[0]?.name || '主要區域'} 是商戶最密集區域`,
-            `🏪 獨立商戶仍是市場主力，連鎖品牌有增長空間`,
-            `📱 NFC支付接受率 ${data.nfcPercentage}%，是非接觸式支付的重要機會`,
-            `💡 建議針對高流量區域優先推廣八達通服務`
+            `Analyzed ${data.total} merchants; Octopus acceptance is ${data.octopusPercentage}%`,
+            `📍 ${data.districtData[0]?.name || 'the leading district'} has the highest merchant concentration`,
+            `Independent merchants remain the core of the market, while chain brands still have room to grow`,
+            `NFC acceptance is ${data.nfcPercentage}%, creating a meaningful contactless payment opportunity`,
+            `Prioritize Octopus promotion in high-traffic districts`
         ];
         
         insights.forEach(insight => {

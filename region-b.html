@@ -755,7 +755,7 @@
       );
 
       if (!text) return 0;
-      if (/open\s*24\s*hours|24\s*hours|24小時/i.test(text)) return 24;
+      if (/open\s*24\s*hours|24\s*hours/i.test(text)) return 24;
       if (/closed/i.test(text) && !/AM|PM/i.test(text)) return 0;
 
       var parts = text.split("|");

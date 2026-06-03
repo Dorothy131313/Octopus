@@ -11,8 +11,9 @@
       min-height: 980px;
     }
 
-    .placeholder-panel {
-      min-height: 260px;
+    .iframe-panel-c {
+      grid-column: 1 / -1;
+      min-height: 1900px;
     }
   </style>
 </head>
@@ -24,7 +25,7 @@
     </div>
     <div class="header-meta">
       <span id="activeFilterCount">All merchants</span>
-      <span>Region A + B</span>
+      <span>Region A + B + C</span>
     </div>
   </header>
 
@@ -45,9 +46,12 @@
       ></iframe>
     </section>
 
-    <section class="iframe-panel placeholder-panel">
-      <h2>Region C</h2>
-      <p>Service insights</p>
+    <section class="iframe-panel iframe-panel-c">
+      <iframe
+        id="regionCFrame"
+        title="Region C Service Insights"
+        src="region-c.html"
+      ></iframe>
     </section>
   </main>
 

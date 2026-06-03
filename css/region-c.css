@@ -1,4 +1,4 @@
-/* region-c.css - 符合規格表 */
+/* region-c.css - Region C styles */
 
 * {
     margin: 0;
@@ -17,7 +17,7 @@ body {
     padding: 24px;
 }
 
-/* 標題區 */
+/* Header */
 .c-header {
     margin-bottom: 28px;
 }
@@ -39,7 +39,7 @@ body {
     margin-top: 6px;
 }
 
-/* 卡片行 */
+/* Card rows */
 .c-row {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -93,7 +93,7 @@ body {
     margin-top: 8px;
 }
 
-/* ===== NFC 進度條 ===== */
+/* ===== NFC progress bar ===== */
 .progress-container {
     margin: 20px 0;
 }
@@ -133,7 +133,7 @@ body {
     font-weight: bold;
 }
 
-/* ===== 商戶類型 / 區域 / 連鎖 水平條 ===== */
+/* ===== Merchant type / district / chain bars ===== */
 .type-bars-container {
     display: flex;
     flex-direction: column;
@@ -191,7 +191,7 @@ body {
     color: #6c757d;
 }
 
-/* ===== 特殊標記表格 ===== */
+/* ===== Special flags table ===== */
 .table-container {
     border-radius: 16px;
     border: 1px solid #e9ecef;
@@ -244,7 +244,7 @@ body {
     font-weight: 600;
 }
 
-/* ===== 數據摘要 ===== */
+/* ===== Data Summary ===== */
 .summary-stats {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -270,7 +270,7 @@ body {
     color: #27ae60;
 }
 
-/* 洞察列表 */
+/* Insights list */
 .insights-list {
     list-style: none;
     padding-left: 0;
@@ -293,7 +293,7 @@ body {
     margin-top: 2px;
 }
 
-/* 響應式 */
+/* Responsive */
 @media (max-width: 1024px) {
     .c-row {
         grid-template-columns: 1fr;
