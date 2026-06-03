@@ -603,7 +603,7 @@
     var chainBrands = [
       "Mannings", "Watsons", "7-Eleven", "Circle K", "AEON", "ParknShop",
       "PARKnSHOP", "Wellcome", "CR Care", "Health Plus", "Fanda",
-      "Sa Sa", "Community Pharmacy", "屈臣氏", "萬寧", "華潤堂"
+      "Sa Sa", "Community Pharmacy"
     ];
 
     /***********************
@@ -703,8 +703,9 @@
 
     function isChain(item) {
       var chainType = getText(item, ["chain_type", "store_type", "type"]).toLowerCase();
-      if (chainType.includes("independent") || chainType.includes("獨立")) return false;
-      if (chainType.includes("chain") || chainType.includes("連鎖")) return true;
+
+      if (chainType.includes("independent")) return false;
+      if (chainType.includes("chain")) return true;
 
       var combined = [
         getMerchantName(item),

@@ -113,7 +113,7 @@
         axisPointer: { type: "shadow" },
         formatter: function (params) {
           var item = params[0];
-          return item.name + "<br>商戶數量: " + item.value;
+          return item.name + "<br>Merchants: " + item.value;
         }
       },
       grid: { left: 42, right: 16, top: 18, bottom: 46, containLabel: true },
@@ -130,14 +130,14 @@
       },
       yAxis: {
         type: "value",
-        name: "商戶數量",
+        name: "Merchants",
         nameTextStyle: { color: "#64748b", padding: [0, 0, 4, 0] },
         axisLabel: { color: "#64748b" },
         splitLine: { lineStyle: { color: "#e8edf3", type: "dashed" } }
       },
       series: [
         {
-          name: "商戶數量",
+          name: "Merchants",
           type: "bar",
           data: counts,
           barWidth: "58%",
