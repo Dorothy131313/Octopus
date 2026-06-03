@@ -1,4 +1,4 @@
-/* region-c.css - Region C styles */
+/* region-c.css - Service Insights Dashboard Styles */
 
 * {
     margin: 0;
@@ -17,7 +17,7 @@ body {
     padding: 24px;
 }
 
-/* Header */
+/* Header Section */
 .c-header {
     margin-bottom: 28px;
 }
@@ -39,7 +39,7 @@ body {
     margin-top: 6px;
 }
 
-/* Card rows */
+/* Card Rows */
 .c-row {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -93,7 +93,7 @@ body {
     margin-top: 8px;
 }
 
-/* ===== NFC progress bar ===== */
+/* ===== NFC Progress Bar ===== */
 .progress-container {
     margin: 20px 0;
 }
@@ -133,7 +133,7 @@ body {
     font-weight: bold;
 }
 
-/* ===== Merchant type / district / chain bars ===== */
+/* ===== Horizontal Bar Items (Merchant Types, Districts, Chains) ===== */
 .type-bars-container {
     display: flex;
     flex-direction: column;
@@ -191,7 +191,7 @@ body {
     color: #6c757d;
 }
 
-/* ===== Special flags table ===== */
+/* ===== Special Remarks Table ===== */
 .table-container {
     border-radius: 16px;
     border: 1px solid #e9ecef;
@@ -270,7 +270,7 @@ body {
     color: #27ae60;
 }
 
-/* Insights list */
+/* Insights List */
 .insights-list {
     list-style: none;
     padding-left: 0;
