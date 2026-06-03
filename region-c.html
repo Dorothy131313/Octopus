@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Part C: Payment Analysis and Merchant Insights | Octopus Pharmacy Dashboard</title>
+    <title>Part C: Payment Analysis & Merchant Insights | Octopus Pharmacy Dashboard</title>
     
-    <!-- Shared styles -->
+    <!-- Shared Styles -->
     <link rel="stylesheet" href="css/common.css">
     <link rel="stylesheet" href="css/region-c.css">
     
@@ -17,39 +17,39 @@
 <body>
     <div class="c-dashboard">
         
-        <!-- ========== Header ========== -->
+        <!-- Header Section -->
         <div class="c-header">
-            <h1><i class="fas fa-chart-line"></i> Part C: Payment Analysis and Merchant Insights</h1>
-            <p>Octopus / Credit Card / Cash / NFC Payment Analysis | Opening Hours | Merchant Types | District Distribution | Special Flags</p>
+            <h1><i class="fas fa-chart-line"></i> Part C: Payment Analysis & Merchant Insights</h1>
+            <p>Octopus / Credit Card / Cash / NFC Payment Analysis | Business Hours | Merchant Types | District Distribution | Special Remarks</p>
         </div>
         
-        <!-- ========== Row 1: Payment Analysis ========== -->
+        <!-- Row 1: Payment Methods (2 charts) -->
         <div class="c-row">
-            <!-- 1. Octopus Payment -->
+            <!-- 1. Octopus Payment (Pie Chart) -->
             <div class="c-card">
                 <h3><i class="fas fa-octopus"></i> Octopus Payment</h3>
                 <div id="octopusChart" class="chart-box" style="height: 220px;"></div>
-                <div class="chart-note">Supported / Not Supported | Source: pharmacy registration records</div>
+                <div class="chart-note">✧ Accepted / ✧ Not Accepted | Source: Pharmacy Registration Records</div>
             </div>
             
-            <!-- 2. Credit Card / Debit Card -->
+            <!-- 2. Credit/Debit Card (Bar Chart) -->
             <div class="c-card">
-                <h3><i class="fas fa-credit-card"></i> Credit Card / Debit Card</h3>
+                <h3><i class="fas fa-credit-card"></i> Credit / Debit Card</h3>
                 <div id="cardChart" class="chart-box" style="height: 220px;"></div>
-                <div class="chart-note">Credit Card / Debit Card | Hover to view counts</div>
+                <div class="chart-note">✧ Credit Card ✧ Debit Card | Hover to view count</div>
             </div>
         </div>
         
-        <!-- ========== Row 2: Cash + NFC ========== -->
+        <!-- Row 2: Cash + NFC -->
         <div class="c-row">
-            <!-- 3. Cash Payment -->
+            <!-- 3. Cash Payment (Donut Chart) -->
             <div class="c-card">
                 <h3><i class="fas fa-money-bill-wave"></i> Cash Payment</h3>
                 <div id="cashChart" class="chart-box" style="height: 220px;"></div>
-                <div class="chart-note">Cash Only / Other Payment Accepted</div>
+                <div class="chart-note">✧ Cash Only / ✧ Accepts Other Payments</div>
             </div>
             
-            <!-- 4. NFC Payment -->
+            <!-- 4. NFC Payment (Progress Bar) -->
             <div class="c-card">
                 <h3><i class="fas fa-wifi"></i> NFC Payment</h3>
                 <div class="progress-container">
@@ -61,47 +61,47 @@
                         <div id="nfcProgressBar" class="progress-bar-fill" style="width: 0%;"></div>
                     </div>
                 </div>
-                <div class="chart-note mt-2">Supports Apple Pay / Google Pay / contactless cards</div>
+                <div class="chart-note mt-2">✧ Supports Apple Pay / Google Pay / Contactless Credit Cards</div>
             </div>
         </div>
         
-        <!-- ========== Row 3: Opening Hours + Merchant Types ========== -->
+        <!-- Row 3: Business Hours + Merchant Types -->
         <div class="c-row">
-            <!-- 5. Opening Hours -->
+            <!-- 5. Business Hours (Stacked Bar Chart) -->
             <div class="c-card">
-                <h3><i class="fas fa-clock"></i> Opening Hours Distribution</h3>
+                <h3><i class="fas fa-clock"></i> Business Hours Distribution</h3>
                 <div id="hoursChart" class="chart-box" style="height: 200px;"></div>
-                <div class="chart-note">Share of merchants by operating pattern</div>
+                <div class="chart-note">✧ Proportion of merchants by operating hours</div>
             </div>
             
-            <!-- 6. Merchant Types -->
+            <!-- 6. Merchant Types (Horizontal Bars) -->
             <div class="c-card">
                 <h3><i class="fas fa-store"></i> Merchant Type Distribution</h3>
                 <div id="typeBars" class="type-bars-container" style="height: 200px; overflow-y: auto;"></div>
-                <div class="chart-note">Click a type to filter | Hover to view counts</div>
+                <div class="chart-note">✧ Click to filter | Hover to view count</div>
             </div>
         </div>
         
-        <!-- ========== Row 4: District + Chain Type ========== -->
+        <!-- Row 4: District Distribution + Chain Types -->
         <div class="c-row">
-            <!-- 7. District Distribution -->
+            <!-- 7. District Distribution (18 Districts) -->
             <div class="c-card">
                 <h3><i class="fas fa-map-marker-alt"></i> District Distribution (18 Districts)</h3>
                 <div id="districtBars" class="type-bars-container" style="height: 200px; overflow-y: auto;"></div>
-                <div class="chart-note">Top 8 districts | Hover to view counts</div>
+                <div class="chart-note">✧ Top 8 districts | Hover to view count</div>
             </div>
             
             <!-- 8. Chain Type Distribution -->
             <div class="c-card">
                 <h3><i class="fas fa-store-alt"></i> Chain Type Distribution</h3>
                 <div id="chainBars" class="type-bars-container" style="height: 200px; overflow-y: auto;"></div>
-                <div class="chart-note">Hover to view counts</div>
+                <div class="chart-note">✧ Hover to view count</div>
             </div>
         </div>
         
-        <!-- ========== Row 5: Special Flags Table ========== -->
+        <!-- Row 5: Special Remarks Table (Full Width) -->
         <div class="c-card-full">
-            <h3><i class="fas fa-flag-checkered"></i> Special-Flagged Merchants</h3>
+            <h3><i class="fas fa-flag-checkered"></i> Special Remarks Merchants</h3>
             <div class="table-container" style="max-height: 300px; overflow-y: auto;">
                 <table id="specialRemarksTable" class="special-table">
                     <thead>
@@ -109,7 +109,7 @@
                             <th style="width: 40%;">Merchant Name</th>
                             <th style="width: 15%;">District</th>
                             <th style="width: 20%;">Chain Type</th>
-                            <th style="width: 25%;">Special Flag</th>
+                            <th style="width: 25%;">Special Remark</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -117,10 +117,10 @@
                     </tbody>
                 </table>
             </div>
-            <div class="chart-note">Only merchants with remarks are shown | Click a row for details</div>
+            <div class="chart-note">✧ Only merchants with remarks are shown | Click row for details</div>
         </div>
         
-        <!-- ========== Row 6: Data Summary ========== -->
+        <!-- Row 6: Data Summary + Key Insights -->
         <div class="c-row">
             <div class="c-card">
                 <h3><i class="fas fa-chart-simple"></i> Data Summary</h3>
@@ -130,7 +130,7 @@
                         <span id="totalMerchants" class="summary-value">--</span>
                     </div>
                     <div class="summary-item">
-                        <span class="summary-label">Octopus Supported:</span>
+                        <span class="summary-label">Supports Octopus:</span>
                         <span id="totalOctopus" class="summary-value">--</span>
                     </div>
                     <div class="summary-item">
@@ -142,7 +142,7 @@
                         <span id="nfcRate" class="summary-value">--</span>
                     </div>
                     <div class="summary-item">
-                        <span class="summary-label">Special-Flagged Merchants:</span>
+                        <span class="summary-label">Special Remarks:</span>
                         <span id="specialCount" class="summary-value">--</span>
                     </div>
                 </div>
@@ -158,7 +158,7 @@
         
     </div>
     
-    <!-- Data and scripts -->
+    <!-- Scripts -->
     <script src="js/data-loader-c.js"></script>
     <script src="js/region-c.js"></script>
 </body>
