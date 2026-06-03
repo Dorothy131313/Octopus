@@ -1,4 +1,4 @@
-// data-loader-c.js - load pharmacy data and calculate statistics
+// data-loader-c.js - Load and aggregate pharmacy data (English version)
 
 let globalAggregated = null;
 let globalPharmacyData = [];
@@ -10,7 +10,6 @@ async function loadPharmacyData() {
         
         let rawData = await response.json();
         
-        // Normalize source data format
         if (Array.isArray(rawData)) {
             globalPharmacyData = rawData;
         } else if (rawData.data && Array.isArray(rawData.data)) {
@@ -20,11 +19,8 @@ async function loadPharmacyData() {
         }
         
         console.log(`Loaded ${globalPharmacyData.length} pharmacy records`);
-        console.log('Sample record:', globalPharmacyData[0]);
         
-        // Aggregate statistics
         globalAggregated = aggregateData(globalPharmacyData);
-        
         return globalAggregated;
         
     } catch (error) {
@@ -36,11 +32,11 @@ async function loadPharmacyData() {
 function aggregateData(data) {
     const total = data.length;
     
-    // 1. Octopus payment statistics (field: octopus_payment_yn)
+    // 1. Octopus payment statistics
     const octopusSupported = data.filter(d => d.octopus_payment_yn === 'Y' || d.octopus_payment_yn === true).length;
     const octopusPercentage = total > 0 ? Math.round((octopusSupported / total) * 100) : 0;
     
-    // 2. Credit/debit card statistics
+    // 2. Credit/Debit card statistics
     let creditCards = 0;
     let debitCards = 0;
     
@@ -56,9 +52,8 @@ function aggregateData(data) {
         }
     });
     
-    // If card fields are all zero, use a total-based estimate
-    const useDemoCardData = creditCards === 0 && debitCards === 0;
-    if (useDemoCardData) {
+    // If card data is all zero, use estimates
+    if (creditCards === 0 && debitCards === 0) {
         creditCards = Math.round(total * 0.49);
         debitCards = Math.round(total * 0.50);
     }
@@ -83,7 +78,7 @@ function aggregateData(data) {
     });
     const nfcPercentage = total > 0 ? Math.round((nfcSupported / total) * 100) : 0;
     
-    // 5. Opening hours statistics
+    // 5. Business hours statistics
     let weekdayOnly = 0;
     let weekFull = 0;
     let limited = 0;
@@ -99,33 +94,27 @@ function aggregateData(data) {
         
         const hoursStr = String(hours).toLowerCase();
         
-        // Check whether weekend hours are present
-        const hasSaturday = hoursStr.includes('saturday');
-        const hasSunday = hoursStr.includes('sunday');
+        const hasSaturday = hoursStr.includes('saturday') || hoursStr.includes('周六') || hoursStr.includes('礼拜六');
+        const hasSunday = hoursStr.includes('sunday') || hoursStr.includes('周日') || hoursStr.includes('礼拜日');
         const hasWeekend = hasSaturday || hasSunday;
         
-        // Check whether weekday hours are present
-        const hasWeekday = hoursStr.includes('monday') ||
-                          hoursStr.includes('tuesday') ||
-                          hoursStr.includes('wednesday') ||
-                          hoursStr.includes('thursday') ||
-                          hoursStr.includes('friday');
+        const hasWeekday = hoursStr.includes('monday') || hoursStr.includes('周一') || 
+                          hoursStr.includes('tuesday') || hoursStr.includes('周二') ||
+                          hoursStr.includes('wednesday') || hoursStr.includes('周三') ||
+                          hoursStr.includes('thursday') || hoursStr.includes('周四') ||
+                          hoursStr.includes('friday') || hoursStr.includes('周五');
         
-        // Check whether the merchant is open 24 hours
-        const is24Hours = hoursStr.includes('24 hours');
+        const is24Hours = hoursStr.includes('24 hours') || hoursStr.includes('24小時');
         
         if (is24Hours || (hasWeekend && hasWeekday)) {
             weekFull++;
         } else if (hasWeekday && !hasWeekend) {
             weekdayOnly++;
-        } else if (hasWeekday || hasWeekend) {
-            limited++;
         } else {
             limited++;
         }
     });
     
-    // If all values are unknown, use an Octopus-based estimate
     let finalWeekdayOnly = weekdayOnly;
     let finalWeekFull = weekFull;
     let finalLimited = limited;
@@ -136,14 +125,6 @@ function aggregateData(data) {
         finalLimited = data.length - finalWeekFull - finalWeekdayOnly;
     }
     
-    console.log('Hours data:', { 
-        weekdayOnly: finalWeekdayOnly, 
-        weekFull: finalWeekFull, 
-        limited: finalLimited, 
-        unknown,
-        total: data.length 
-    });
-    
     // 6. Merchant type statistics
     const typeCount = new Map();
     data.forEach(d => {
@@ -153,8 +134,7 @@ function aggregateData(data) {
         else if (type === 'supermarket') type = 'Supermarket';
         else if (type === 'convenience_store') type = 'Convenience Store';
         else if (type === 'store') type = 'Store';
-        else if (type === 'manufacturer') type = 'Manufacturer / Wholesaler';
-        else if (type === 'point_of_interest') type = 'Other';
+        else if (type === 'manufacturer') type = 'Manufacturer';
         
         typeCount.set(type, (typeCount.get(type) || 0) + 1);
     });
@@ -185,7 +165,7 @@ function aggregateData(data) {
         .slice(0, 6)
         .map(([name, count]) => ({ name, count, percentage: Math.round((count / total) * 100) }));
     
-    // 9. Special-flagged merchants
+    // 9. Special remarks merchants
     const specialMerchants = data.filter(d => d.manual_remark && d.manual_remark.trim() !== '')
         .slice(0, 30)
         .map(m => ({
@@ -220,34 +200,33 @@ function aggregateData(data) {
 function generateInsights(total, octopusRate, nfcRate, districtData, chainData) {
     const insights = [];
     
-    insights.push(`Analyzed ${total} merchants; Octopus acceptance is ${octopusRate}%`);
+    insights.push(`📊 Total of ${total} merchants analyzed. Octopus acceptance rate is ${octopusRate}%`);
     
     if (octopusRate > 60) {
-        insights.push(`Octopus penetration in the pharmacy sector is solid (${octopusRate}%), with room for further growth`);
+        insights.push(`✅ Octopus penetration is solid (${octopusRate}%) in the pharmacy sector, with room for growth`);
     } else {
-        insights.push(`Octopus acceptance is ${octopusRate}%; stronger promotion could increase market share`);
+        insights.push(`📈 Octopus acceptance rate is ${octopusRate}%. Promote adoption to increase market share`);
     }
     
     if (districtData.length > 0) {
         const topDistrict = districtData[0];
-        insights.push(`${topDistrict.name} has the highest merchant concentration (${topDistrict.count}, ${topDistrict.percentage}% share)`);
+        insights.push(`📍 ${topDistrict.name} is the most merchant-dense area (${topDistrict.count} merchants, ${topDistrict.percentage}%)`);
     }
     
-    const topChains = chainData.slice(0, 3).map(c => c.name).join('、');
-    insights.push(`Major chain brands: ${topChains}; independent merchants remain the core of the market`);
+    const topChains = chainData.slice(0, 3).map(c => c.name).join(', ');
+    insights.push(`🏪 Top chain types: ${topChains}. Independent merchants remain the market majority`);
     
     if (nfcRate < 30) {
-        insights.push(`NFC acceptance is only ${nfcRate}%, creating a meaningful contactless payment growth opportunity`);
+        insights.push(`📱 NFC payment acceptance is only ${nfcRate}%, representing a significant growth opportunity`);
     } else {
-        insights.push(`NFC acceptance is ${nfcRate}%, and contactless payments are gaining adoption`);
+        insights.push(`📱 NFC payment acceptance is ${nfcRate}%, contactless payments are gaining traction`);
     }
     
-    insights.push(`Prioritize Octopus promotion in high-traffic districts such as ${districtData[0]?.name || 'the leading district'}`);
+    insights.push(`💡 Recommendation: Prioritize Octopus promotion in high-traffic areas like ${districtData[0]?.name || 'key districts'}`);
     
     return insights;
 }
 
-// Demo data
 function getDemoData() {
     const total = 1197;
     return {
@@ -284,20 +263,16 @@ function getDemoData() {
         specialMerchants: [
             { name: 'JOINT PUBLISHING - TSING YI', district: 'KWAI TSING', chain: 'Independent / Others', remark: 'Non-Pharmacy' },
             { name: 'DR. HAIR', district: 'TSUEN WAN', chain: 'Independent / Others', remark: 'Hair' },
-            { name: 'TUNG WAH GROUP OF HOSPITALS', district: 'TSUEN WAN', chain: 'Independent / Others', remark: 'Hospital?' },
-            { name: 'TOWNGAS', district: 'SAI KUNG', chain: 'Independent / Others', remark: 'Non-Pharmacy' },
-            { name: 'JOINT PUBLISHING - CITYWALK', district: 'TSUEN WAN', chain: 'Independent / Others', remark: 'Non-Pharmacy' },
-            { name: 'H.A.I.R 3000', district: 'SAI KUNG', chain: 'Independent / Others', remark: 'Hair' }
+            { name: 'TUNG WAH GROUP OF HOSPITALS', district: 'TSUEN WAN', chain: 'Independent / Others', remark: 'Hospital?' }
         ],
         insights: [
-            'Analyzed 1197 merchants; Octopus acceptance is 59%',
-            'TSUEN WAN has the highest merchant concentration (559, 47% share)',
-            'Independent merchants remain the core of the market (61%), while chain brands still have room to grow',
-            'NFC acceptance is 53%, and contactless payments are gaining adoption',
-            'Prioritize Octopus promotion in high-traffic districts'
+            '📊 Total of 1197 merchants analyzed. Octopus acceptance rate is 59%',
+            '📍 TSUEN WAN is the most merchant-dense area (559 merchants, 47%)',
+            '🏪 Independent merchants remain the market majority (61%), room for chain growth',
+            '📱 NFC payment acceptance is 53%, contactless payments are gaining traction',
+            '💡 Recommendation: Prioritize Octopus promotion in high-traffic areas'
         ]
     };
 }
 
-// Auto-load
 loadPharmacyData();
