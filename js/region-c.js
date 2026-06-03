@@ -1,4 +1,4 @@
-// region-c.js - service insights dashboard
+// region-c.js - Service Insights Dashboard (English Version - Fully Fixed)
 
 let aggregatedData = null;
 
@@ -7,10 +7,13 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     await new Promise(resolve => setTimeout(resolve, 800));
     
-    if (globalAggregated) {
+    if (typeof globalAggregated !== 'undefined' && globalAggregated) {
         aggregatedData = globalAggregated;
-    } else {
+    } else if (typeof loadPharmacyData !== 'undefined') {
         aggregatedData = await loadPharmacyData();
+    } else {
+        console.error('Data loader not found');
+        return;
     }
     
     console.log('Rendering with data:', aggregatedData);
@@ -37,14 +40,14 @@ function renderOctopusChart() {
     
     chart.setOption({
         title: { 
-            text: `Octopus Acceptance Rate: ${aggregatedData.octopusPercentage}%`, 
+            text: `Octopus Acceptance: ${aggregatedData.octopusPercentage}%`, 
             left: 'center', 
             top: 0, 
             textStyle: { fontSize: 12, fontWeight: 'normal' } 
         },
         tooltip: { 
             trigger: 'item', 
-            formatter: '{b}: {d}% ({c})' 
+            formatter: '{b}: {d}% ({c} stores)' 
         },
         color: ['#27ae60', '#95a5a6'],
         series: [{
@@ -52,8 +55,8 @@ function renderOctopusChart() {
             radius: '55%',
             center: ['50%', '55%'],
             data: [
-                { name: 'Octopus Supported', value: supported },
-                { name: 'Not Supported', value: notSupported }
+                { name: 'Accepts Octopus', value: supported },
+                { name: 'Does Not Accept', value: notSupported }
             ],
             label: { 
                 show: true, 
@@ -72,7 +75,7 @@ function renderCardChart() {
         tooltip: { 
             trigger: 'axis', 
             axisPointer: { type: 'shadow' },
-            formatter: '{b}: {c} merchants'
+            formatter: '{b}: {c} stores'
         },
         color: ['#9b59b6', '#8e44ad'],
         title: { 
@@ -89,7 +92,7 @@ function renderCardChart() {
         },
         yAxis: { 
             type: 'value', 
-            name: 'Merchant Count',
+            name: 'Number of Merchants',
             nameLocation: 'middle',
             nameGap: 45,
             min: 0
@@ -119,11 +122,11 @@ function renderCashChart() {
     chart.setOption({
         tooltip: { 
             trigger: 'item', 
-            formatter: '{b}: {d}% ({c})' 
+            formatter: '{b}: {d}% ({c} stores)' 
         },
         color: ['#f1c40f', '#e67e22'],
         title: { 
-            text: `Cash-Only Share: ${aggregatedData.cashOnlyPercentage}%`, 
+            text: `Cash Only: ${aggregatedData.cashOnlyPercentage}%`, 
             left: 'center', 
             top: 0, 
             textStyle: { fontSize: 12 } 
@@ -134,7 +137,7 @@ function renderCashChart() {
             center: ['50%', '55%'],
             data: [
                 { name: 'Cash Only', value: cashOnly },
-                { name: 'Other Payment Accepted', value: others }
+                { name: 'Accepts Other Payments', value: others }
             ],
             label: { 
                 show: true, 
@@ -149,8 +152,10 @@ function renderNFCProgress() {
     const percentage = aggregatedData.nfcPercentage;
     document.getElementById('nfcPercentage').innerText = percentage + '%';
     const progressBar = document.getElementById('nfcProgressBar');
-    progressBar.style.width = percentage + '%';
-    progressBar.innerText = percentage > 15 ? percentage + '%' : '';
+    if (progressBar) {
+        progressBar.style.width = percentage + '%';
+        progressBar.innerText = percentage > 15 ? percentage + '%' : '';
+    }
 }
 
 function renderHoursChart() {
@@ -164,17 +169,17 @@ function renderHoursChart() {
             trigger: 'axis', 
             axisPointer: { type: 'shadow' },
             formatter: function(params) {
-                let result = 'Opening Hours Distribution<br/>';
+                let result = 'Business Hours Distribution<br/>';
                 params.forEach(p => {
                     const percent = ((p.value / total) * 100).toFixed(1);
-                    result += `${p.marker} ${p.seriesName}: ${p.value} (${percent}%)<br/>`;
+                    result += `${p.marker} ${p.seriesName}: ${p.value} stores (${percent}%)<br/>`;
                 });
                 return result;
             }
         },
         color: ['#27ae60', '#3498db', '#95a5a6'],
         title: { 
-            text: `Opening Hours Distribution (Total Merchants: ${total})`, 
+            text: `Business Hours Distribution (Total: ${total} stores)`, 
             left: 'center', 
             top: 0, 
             textStyle: { fontSize: 12 } 
@@ -182,12 +187,12 @@ function renderHoursChart() {
         grid: { top: 50, bottom: 20, left: 60, right: 30 },
         xAxis: { 
             type: 'category', 
-            data: ['Opening Hours'],
+            data: ['Business Hours'],
             axisLabel: { fontSize: 12 }
         },
         yAxis: { 
             type: 'value', 
-            name: 'Merchant Count',
+            name: 'Number of Merchants',
             nameLocation: 'middle',
             nameGap: 45,
             min: 0,
@@ -195,25 +200,25 @@ function renderHoursChart() {
         },
         series: [
             { 
-                name: 'Open All Week', 
+                name: 'Open 7 Days', 
                 type: 'bar', 
                 data: [weekFull], 
                 itemStyle: { borderRadius: [8, 0, 0, 8], color: '#27ae60' },
-                label: { show: true, position: 'inside', formatter: '{c}' } 
+                label: { show: true, position: 'inside', formatter: '{c} stores' } 
             },
             { 
                 name: 'Weekdays Only', 
                 type: 'bar', 
                 data: [weekdayOnly], 
                 itemStyle: { borderRadius: [0, 0, 0, 0], color: '#3498db' },
-                label: { show: true, position: 'inside', formatter: '{c}' } 
+                label: { show: true, position: 'inside', formatter: '{c} stores' } 
             },
             { 
                 name: 'Limited / Unknown', 
                 type: 'bar', 
                 data: [limited], 
                 itemStyle: { borderRadius: [0, 8, 8, 0], color: '#95a5a6' },
-                label: { show: true, position: 'inside', formatter: '{c}' } 
+                label: { show: true, position: 'inside', formatter: '{c} stores' } 
             }
         ]
     });
@@ -221,8 +226,18 @@ function renderHoursChart() {
 
 function renderMerchantTypeBars() {
     const container = document.getElementById('typeBars');
-    if (!container) return;
+    if (!container) {
+        console.error('typeBars container not found');
+        return;
+    }
     container.innerHTML = '';
+    
+    console.log('Merchant Types data:', aggregatedData.merchantTypes);
+    
+    if (!aggregatedData.merchantTypes || aggregatedData.merchantTypes.length === 0) {
+        container.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">No merchant type data available</div>';
+        return;
+    }
     
     const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7B05E'];
     
@@ -230,7 +245,7 @@ function renderMerchantTypeBars() {
         const color = colors[idx % colors.length];
         const div = document.createElement('div');
         div.className = 'type-bar-item';
-        div.onclick = () => alert(`Filter: ${type.name}\nTotal: ${type.count} merchants (share ${type.percentage}%)`);
+        div.onclick = () => alert(`Filter: ${type.name}\nTotal: ${type.count} merchants (${type.percentage}%)`);
         
         div.innerHTML = `
             <span class="type-label" title="${type.name}">${type.name}</span>
@@ -247,8 +262,18 @@ function renderMerchantTypeBars() {
 
 function renderDistrictChart() {
     const container = document.getElementById('districtBars');
-    if (!container) return;
+    if (!container) {
+        console.error('districtBars container not found');
+        return;
+    }
     container.innerHTML = '';
+    
+    console.log('District data:', aggregatedData.districtData);
+    
+    if (!aggregatedData.districtData || aggregatedData.districtData.length === 0) {
+        container.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">No district data available</div>';
+        return;
+    }
     
     const colors = ['#3498db', '#2ecc71', '#e74c3c', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22', '#34495e'];
     
@@ -256,7 +281,7 @@ function renderDistrictChart() {
         const color = colors[idx % colors.length];
         const div = document.createElement('div');
         div.className = 'type-bar-item';
-        div.onclick = () => alert(`${district.name}\nTotal: ${district.count} merchants (share ${district.percentage}%)`);
+        div.onclick = () => alert(`${district.name}\nTotal: ${district.count} merchants (${district.percentage}%)`);
         
         div.innerHTML = `
             <span class="type-label" style="width: 100px;" title="${district.name}">${district.name}</span>
@@ -273,8 +298,18 @@ function renderDistrictChart() {
 
 function renderChainChart() {
     const container = document.getElementById('chainBars');
-    if (!container) return;
+    if (!container) {
+        console.error('chainBars container not found');
+        return;
+    }
     container.innerHTML = '';
+    
+    console.log('Chain data:', aggregatedData.chainData);
+    
+    if (!aggregatedData.chainData || aggregatedData.chainData.length === 0) {
+        container.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">No chain type data available</div>';
+        return;
+    }
     
     const colors = ['#e74c3c', '#3498db', '#f39c12', '#2ecc71', '#9b59b6', '#1abc9c'];
     
@@ -282,7 +317,7 @@ function renderChainChart() {
         const color = colors[idx % colors.length];
         const div = document.createElement('div');
         div.className = 'type-bar-item';
-        div.onclick = () => alert(`${chain.name}\nTotal: ${chain.count} merchants (share ${chain.percentage}%)`);
+        div.onclick = () => alert(`${chain.name}\nTotal: ${chain.count} merchants (${chain.percentage}%)`);
         
         div.innerHTML = `
             <span class="type-label" style="width: 130px;" title="${chain.name}">${chain.name}</span>
@@ -299,11 +334,14 @@ function renderChainChart() {
 
 function renderSpecialRemarksTable() {
     const tbody = document.querySelector('#specialRemarksTable tbody');
-    if (!tbody) return;
+    if (!tbody) {
+        console.error('specialRemarksTable tbody not found');
+        return;
+    }
     tbody.innerHTML = '';
     
     if (!aggregatedData.specialMerchants || aggregatedData.specialMerchants.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4">No special-flagged merchants</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="4">No special remarks merchants found</td></tr>';
         return;
     }
     
@@ -338,11 +376,11 @@ function updateSummaryAndInsights(data) {
         insightsList.innerHTML = '';
         
         const insights = data.insights || [
-            `Analyzed ${data.total} merchants; Octopus acceptance is ${data.octopusPercentage}%`,
-            `📍 ${data.districtData[0]?.name || 'the leading district'} has the highest merchant concentration`,
-            `Independent merchants remain the core of the market, while chain brands still have room to grow`,
-            `NFC acceptance is ${data.nfcPercentage}%, creating a meaningful contactless payment opportunity`,
-            `Prioritize Octopus promotion in high-traffic districts`
+            `📊 Total of ${data.total} merchants analyzed. Octopus acceptance rate is ${data.octopusPercentage}%`,
+            `📍 ${data.districtData[0]?.name || 'Key district'} is the most merchant-dense area`,
+            `🏪 Independent merchants remain the market majority, room for chain growth`,
+            `📱 NFC payment acceptance is ${data.nfcPercentage}%, contactless payments are gaining traction`,
+            `💡 Recommendation: Prioritize Octopus promotion in high-traffic areas`
         ];
         
         insights.forEach(insight => {
@@ -354,7 +392,7 @@ function updateSummaryAndInsights(data) {
 }
 
 function showErrorState() {
-    const elements = ['satisfactionRate', 'avgTransactionTime', 'repeatUsageRate', 'usageGrowth'];
+    const elements = ['totalMerchants', 'totalOctopus', 'octopusRate', 'nfcRate', 'specialCount'];
     elements.forEach(id => {
         const el = document.getElementById(id);
         if (el) el.innerHTML = 'Error';
